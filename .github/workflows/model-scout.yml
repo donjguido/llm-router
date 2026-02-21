@@ -1,0 +1,48 @@
+name: Weekly Model Scout
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday 9am UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  scout:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests pyyaml
+
+      - name: Run model scout
+        id: scout
+        env:
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+        run: python -m llm_router.scout --output scout-report.md
+
+      - name: Commit report
+        run: |
+          git config user.name "LLM Router Bot"
+          git config user.email "bot@llm-router.dev"
+          git add scout-report.md
+          git diff --cached --quiet || (git commit -m "Scout: update model recommendations" && git push)
+
+      - name: Create issue if updates found
+        if: steps.scout.outputs.updates_needed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "Model Scout: Review free model recommendations ($(date +%Y-%m-%d))" \
+            --body-file scout-report.md \
+            --label "model-scout"

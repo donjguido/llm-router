@@ -1,0 +1,30 @@
+# LLM Router — Routing Profiles
+# Each profile defines an ordered list of providers to try.
+# The router tries each provider in order, falling back on failure.
+
+profiles:
+  free-only:
+    description: "Only use free-tier APIs"
+    providers:
+      - gemini-free
+      - openrouter-free
+      - mistral-free
+
+  paid-first:
+    description: "Best quality: paid models first, free as fallback"
+    providers:
+      - anthropic
+      - openai
+      - grok
+      - gemini-free
+      - openrouter-free
+      - mistral-free
+
+  balanced:
+    description: "Free first to save costs, paid as last resort"
+    providers:
+      - gemini-free
+      - openrouter-free
+      - mistral-free
+      - openai
+      - anthropic
