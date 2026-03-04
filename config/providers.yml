@@ -8,7 +8,7 @@ providers:
     base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
     env_key: "GEMINI_API_KEY"
     sdk: "openai"
-    default_model: "gemini-2.0-flash"
+    default_model: "gemini-3-flash-preview"
     tier: "free"
     rate_limit:
       requests_per_minute: 15
