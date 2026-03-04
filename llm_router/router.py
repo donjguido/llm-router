@@ -142,6 +142,7 @@ class LLMRouter:
         # Extract common params
         temperature = kwargs.get("temperature", 0.7)
         max_tokens = kwargs.get("max_tokens", 4096)
+        response_format = kwargs.get("response_format")
 
         if is_anthropic:
             # Anthropic SDK: extract system message if present
@@ -170,12 +171,15 @@ class LLMRouter:
             }
         else:
             # OpenAI-compatible SDK
-            response = client.chat.completions.create(
-                model=model,
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-            )
+            call_kwargs = {
+                "model": model,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+            }
+            if response_format:
+                call_kwargs["response_format"] = response_format
+            response = client.chat.completions.create(**call_kwargs)
             text = response.choices[0].message.content
             usage = {}
             if hasattr(response, "usage") and response.usage:
